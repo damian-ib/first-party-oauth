@@ -1,4 +1,5 @@
 import oauth_requests
+import logging
 
 
 def main(access_token: str, access_token_secret: str):
@@ -43,7 +44,13 @@ def main(access_token: str, access_token_secret: str):
 
 
 if __name__ == "__main__":
-    # Set the access token and access token secret generated in the self-service portal
+    logging.basicConfig(
+        level=logging.INFO, format="%(message)s", filemode="w", filename="oauth.log"
+    )
     access_token = None
     access_token_secret = None
+    if access_token is None or access_token_secret is None:
+        raise Exception(
+            "Please set the access token and access token secret generated in the self-service portal. The self-service portal can be found at: https://ndcdyn.interactivebrokers.com/sso/Login?action=OAUTH&RL=1&ip2loc=US"
+        )
     main(access_token, access_token_secret)

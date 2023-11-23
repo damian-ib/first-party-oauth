@@ -1,5 +1,7 @@
 import requests
+import logging
 import dotenv
+import time
 import os
 
 import oauth_utils
@@ -45,6 +47,20 @@ def send_oauth_request(
         request_params=request_params,
         prepend=prepend,
     )
+    logging.info(
+        msg={
+            "message": "generated base string",
+            "timestamp": time.time(),
+            "details": {
+                "base_string": base_string,
+                "request_method": request_method,
+                "request_url": request_url,
+                "request_headers": headers,
+                "request_params": request_params,
+                "prepend": prepend,
+            },
+        }
+    )
     if signature_method == "HMAC-SHA256":
         headers.update(
             {
@@ -65,7 +81,17 @@ def send_oauth_request(
                 )
             }
         )
-    return requests.request(
+    logging.info(
+        msg={
+            "message": "generated signature",
+            "timestamp": time.time(),
+            "details": {
+                "signature": headers["oauth_signature"],
+                "signature_method": signature_method,
+            },
+        }
+    )
+    response = requests.request(
         method=request_method,
         url=request_url,
         headers={
@@ -77,6 +103,21 @@ def send_oauth_request(
         params=request_params,
         timeout=10,
     )
+    logging.info(
+        msg={
+            "message": "sent oauth request",
+            "timestamp": time.time(),
+            "details": {
+                "request_method": request_method,
+                "request_url": response.request.url,
+                "request_headers": response.request.headers,
+                "request_body": response.request.body,
+                "response_status_code": response.status_code,
+                "response_error_message": response.text if not response.ok else None,
+            },
+        }
+    )
+    return response
 
 
 # Authentication flow
